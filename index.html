@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HLS Player with Advanced Controls</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.10/hls.min.js"></script>
+    <style>
+        .player-container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .controls {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .control-group {
+            margin: 10px 0;
+        }
+        .sync-status {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <video id="video" controls style="width: 100%;"></video>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Playback Speed:</label>
+                <select id="playbackSpeed" onchange="updatePlaybackSpeed()">
+                    <option value="0.5">0.5x</option>
+                    <option value="0.75">0.75x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2x</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Audio Delay (seconds):</label>
+                <input type="number" id="audioDelay" value="0" step="0.1" style="width: 60px">
+                <button class="button" onclick="updateAudioDelay()">Apply Delay</button>
+            </div>
+
+            <div class="control-group">
+                <button class="button" onclick="skipBackward()">-10s</button>
+                <button class="button" onclick="skipForward()">+10s</button>
+                <button class="button" onclick="syncAudioVideo()">Force Sync</button>
+                <button class="button" onclick="toggleMute()">Toggle Mute</button>
+            </div>
+
+            <div class="control-group">
+                <label>Volume:</label>
+                <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1" 
+                       oninput="updateVolume()">
+            </div>
+
+            <div class="sync-status">
+                Video Time: <span id="videoTime">0:00</span> | 
+                Audio Time: <span id="audioTime">0:00</span> | 
+                Sync Difference: <span id="syncDiff">0.000</span>s
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let video = document.getElementById('video');
+        let audioElement = new Audio();
+        let hls, audioHls;
+
+        function formatTime(seconds) {
+            return new Date(seconds * 1000).toISOString().substr(11, 8);
+        }
+
+        function updateSyncStatus() {
+            document.getElementById('videoTime').textContent = formatTime(video.currentTime);
+            document.getElementById('audioTime').textContent = formatTime(audioElement.currentTime);
+            document.getElementById('syncDiff').textContent = 
+                (video.currentTime - audioElement.currentTime).toFixed(3);
+        }
+
+        if (Hls.isSupported()) {
+            video = document.getElementById('video');
+            hls = new Hls({
+                debug: true,
+                enableWorker: true
+            });
+
+            // Load video manifest
+            hls.loadSource('./public/video/Maharaja/master.m3u8');
+            hls.attachMedia(video);
+
+            // Load audio manifest
+            audioHls = new Hls();
+            audioHls.loadSource('./public/audio/Maharaja/master.m3u8');
+            audioHls.attachMedia(audioElement);
+
+            // Enhanced sync events
+            video.addEventListener('play', function() {
+                audioElement.play();
+                updateSyncStatus();
+            });
+
+            video.addEventListener('pause', function() {
+                audioElement.pause();
+                updateSyncStatus();
+            });
+
+            video.addEventListener('seeking', function() {
+                audioElement.currentTime = video.currentTime;
+                updateSyncStatus();
+            });
+
+            // Update sync status periodically
+            setInterval(updateSyncStatus, 100);
+        }
+
+        // Control functions
+        function updatePlaybackSpeed() {
+            const speed = document.getElementById('playbackSpeed').value;
+            video.playbackRate = parseFloat(speed);
+            audioElement.playbackRate = parseFloat(speed);
+        }
+
+        function updateAudioDelay() {
+            const delay = parseFloat(document.getElementById('audioDelay').value);
+            audioElement.currentTime = video.currentTime + delay;
+        }
+
+        function skipBackward() {
+            video.currentTime -= 10;
+            audioElement.currentTime = video.currentTime;
+        }
+
+        function skipForward() {
+            video.currentTime += 10;
+            audioElement.currentTime = video.currentTime;
+        }
+
+        function syncAudioVideo() {
+            audioElement.currentTime = video.currentTime;
+        }
+
+        function toggleMute() {
+            audioElement.muted = !audioElement.muted;
+        }
+
+        function updateVolume() {
+            const volume = document.getElementById('volumeControl').value;
+            audioElement.volume = volume;
+        }
+
+        // Error handling
+        hls.on(Hls.Events.ERROR, function(event, data) {
+            if (data.fatal) {
+                switch(data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        hls.startLoad();
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        hls.recoverMediaError();
+                        break;
+                    default:
+                        hls.destroy();
+                        break;
+                }
+            }
+        });
+
+        audioHls.on(Hls.Events.ERROR, function(event, data) {
+            if (data.fatal) {
+                switch(data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        audioHls.startLoad();
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        audioHls.recoverMediaError();
+                        break;
+                    default:
+                        audioHls.destroy();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
