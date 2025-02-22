@@ -13,18 +13,19 @@ async function fetchPlaylist(id) {
     'Accept-Encoding': 'gzip, deflate, br, zstd',  // Updated compression algorithms
     'Accept-Language': 'en-US,en;q=0.9,de;q=0.8',
     'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Cookie': '81728596=9769%3A10137; t_hash_t=82cf37e0f78daddae57d98eb349f7238%3A%3A7d334548f58814fc5880bb9a7f4f3ded%3A%3A1738380686%3A%3Ani; t_hash=88263b38ef4bd45b0862c7b0fbe0cb92%3A%3A1738384435%3A%3Ani; cf_clearance=CaUgEPY_sJP6d1ynyYS_.gD6hi.rq7czTmBMhFEALYU-1738384477-1.2.1.1-oDHO7P70Wq3_8Gb6LORYqNkF7JhVY40B2dVF_sxJs8n1o.k86BROQx0bu9qy1M9x6EKg0nUB_Bd6DruDEq0wV0oEEzUENOVqxQRN8mDlOfalaXWDgfQpmROywZaG5A3.YL8OZE2ydffTFjDlFniGr0EHpEcAjadI_en.3GQFZskqWNOVv_.IKGkdx8ZnKQGWIoPLXGAXoo.0vzjmbpFlE5Mx9MfbNUHw3Orw.NMjoHZWWgrD2Q8oyq0RC1fWaIHw43ZYay3S8JabMYINsZnpIBJcfq8BRChRVDPdq1KGNh8',
+    'Cookie': 'addhash=5b20fa83c45512ed8a7e9d5ef6150e8d%3A%3A542ec068da45cdd051f6fe234f8ffbf1%3A%3A1740217509%3A%3Ani; cf_clearance=hgpRgPxDFj0SGRdOfemj24CGnthmPM6PyOj2eY63uTc-1740217511-1.2.1.1-2L485lk1qQNfhvuShFFr10hoTwu4Vhs5Oo7LwxEa9Un4tsbS71VAfSyjdUcM3BJWVggkS5QI__wunfQB9zyhEPHlV5I3RbRb07wDXRy6a4luDbLLMKUenzpheQNMHLi4EmKbXSBkUcOyTBOAQbiX5ZPmMU8NNXnpZZOM4HZcEVCdn8rzjGNodOtP_5i1UQFvAav0IWcMQkFQ8rDezZNOiej_ZyPR2SE0K3NT2GJ.Xk6SE6kP9m5XY0hRAk.2bfN7boJX0DXnCIB.0VI_2tazP_58jKNxZihRKT9.aWluGuY; t_hash_t=d12aee824f70ae27f6128e823daa0c20%3A%3Ab79eb7f13bd49441932aa0e2ad87a96e%3A%3A1740217550%3A%3Ani; hd=on',
     'Referer': 'https://iosmirror.cc/home',
-    'Sec-Ch-Ua': '"Not A(Brand";v="8", "Chromium";v="132", "Brave";v="132"',
-    'Sec-Ch-Ua-Mobile': '?1',
-    'Sec-Ch-Ua-Platform': '"Android"',
+    'Sec-Ch-Ua': '"Not(A:Brand";v="99", "Brave";v="133", "Chromium";v="133"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"Linux"',
     'Sec-Fetch-Dest': 'empty',
     'Sec-Fetch-Mode': 'cors',
     'Sec-Fetch-Site': 'same-origin',
     'Sec-Gpc': '1',
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Mobile Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
     'Connection': 'keep-alive',
-  };
+};
+
 
   try {
     const response = await fetch(url, { method: 'GET', headers });
@@ -33,7 +34,7 @@ async function fetchPlaylist(id) {
     if (response.ok) {
       const data = await response.json();  // Assuming the response is JSON
 
-      const title = "Maharaja"
+      const title = "Kantara"
       await getMainFile("https://iosmirror.cc" + data[0].sources[0].file, title)
       // data[0].sources
     } else {
@@ -79,9 +80,18 @@ async function getMainFile(url, title) {
   }
   const body = await response.text();
   const parseLinks = parseM3U(body);
+  
+  let audioLink;
+  parseLinks.audioLinks.filter((link) => {
+    if (link.language.toLowerCase() === "hindi") {
+      audioLink = link.url;
+    }
+  });
+  if (!audioLink) {
+    audioLink = parseLinks.audioLinks[0].url;
+  }
 
   const videoLink = parseLinks.videoLinks[0].url
-  const audioLink = parseLinks.audioLinks[0].url
   await Promise.all([
     downloadHLSSegments(parseLinks.videoSegmentUrl, videoLink, "video", title),
     downloadHLSSegments(parseLinks.audioSegmentsUrl, audioLink, "audio", title)
@@ -90,7 +100,7 @@ async function getMainFile(url, title) {
 }
 
 
-fetchPlaylist(81690671);
+fetchPlaylist(81656709);
 
 
 

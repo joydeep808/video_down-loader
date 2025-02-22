@@ -109,10 +109,10 @@ export function getCommonBaseUrl(url1, url2) {
   const parsedUrl1 = new URL(url1);
   const parsedUrl2 = new URL(url2);
 
-  // Compare the protocol and host
-  if (parsedUrl1.protocol !== parsedUrl2.protocol || parsedUrl1.host !== parsedUrl2.host) {
-    throw new Error("The provided URLs do not share a common base.");
-  }
+  // // Compare the protocol and host
+  // if (parsedUrl1.protocol !== parsedUrl2.protocol || parsedUrl1.host !== parsedUrl2.host) {
+  //   throw new Error("The provided URLs do not share a common base.");
+  // }
 
   // Return the common base URL by combining the protocol, host, and path up to the first slash after domain
   const commonBase = `${parsedUrl1.protocol}//${parsedUrl1.host}${parsedUrl1.pathname.split('/').slice(0, 3).join('/')}`;

@@ -103,12 +103,12 @@
             });
 
             // Load video manifest
-            hls.loadSource('./public/video/Maharaja/master.m3u8');
+            hls.loadSource('./public/video/Kantara/master.m3u8');
             hls.attachMedia(video);
 
             // Load audio manifest
             audioHls = new Hls();
-            audioHls.loadSource('./public/audio/Maharaja/master.m3u8');
+            audioHls.loadSource('./public/audio/Kantara/master.m3u8');
             audioHls.attachMedia(audioElement);
 
             // Enhanced sync events

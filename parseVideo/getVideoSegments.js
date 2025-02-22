@@ -10,16 +10,21 @@ export async function downloadHLSSegments(commonUrl, url, name, title) {
     console.log(`[MASTER] Fetching master playlist: ${url}`);
     const masterResponse = await fetch(url, {
       "headers": {
-        "accept": "/",
-        "accept-language": "en-US,en;q=0.9",
-        "priority": "u=1, i",
-        "sec-ch-ua": "\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Brave\";v=\"132\"",
-        "sec-ch-ua-mobile": "?1",
-        "sec-ch-ua-platform": "\"Android\"",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-origin",
-        "sec-gpc": "1"
+          "Accept": "*/*",
+          "Accept-Encoding": "gzip, deflate, br, zstd",  // Updated compression algorithms
+          "Accept-Language": "en-US,en;q=0.9,de;q=0.8",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Cookie": "addhash=5b20fa83c45512ed8a7e9d5ef6150e8d%3A%3A542ec068da45cdd051f6fe234f8ffbf1%3A%3A1740217509%3A%3Ani; cf_clearance=hgpRgPxDFj0SGRdOfemj24CGnthmPM6PyOj2eY63uTc-1740217511-1.2.1.1-2L485lk1qQNfhvuShFFr10hoTwu4Vhs5Oo7LwxEa9Un4tsbS71VAfSyjdUcM3BJWVggkS5QI__wunfQB9zyhEPHlV5I3RbRb07wDXRy6a4luDbLLMKUenzpheQNMHLi4EmKbXSBkUcOyTBOAQbiX5ZPmMU8NNXnpZZOM4HZcEVCdn8rzjGNodOtP_5i1UQFvAav0IWcMQkFQ8rDezZNOiej_ZyPR2SE0K3NT2GJ.Xk6SE6kP9m5XY0hRAk.2bfN7boJX0DXnCIB.0VI_2tazP_58jKNxZihRKT9.aWluGuY; t_hash_t=d12aee824f70ae27f6128e823daa0c20%3A%3Ab79eb7f13bd49441932aa0e2ad87a96e%3A%3A1740217550%3A%3Ani; hd=on",
+          "Referer": "https://iosmirror.cc/home",
+          "Sec-Ch-Ua": "\"Not(A:Brand\";v=\"99\", \"Brave\";v=\"133\", \"Chromium\";v=\"133\"",
+          "Sec-Ch-Ua-Mobile": "?0",
+          "Sec-Ch-Ua-Platform": "\"Linux\"",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-origin",
+          "Sec-Gpc": "1",
+          "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+          "Connection": "keep-alive"
       },
       "referrer": "https://iosmirror.cc/home",
       "referrerPolicy": "strict-origin-when-cross-origin",
@@ -27,17 +32,18 @@ export async function downloadHLSSegments(commonUrl, url, name, title) {
       "method": "GET",
       "mode": "cors",
       "credentials": "include"
-    });
+  });
+  
 
     // Step 2: Extract the master playlist content
     const masterPlaylist = await masterResponse.text();
 
     // Step 3: Create a folder for the video segments
-    const folder = fs.mkdirSync(`./public/${name + "/" + title}`, { recursive: true });
-
+    const folder = "./public/" + name + "/" + title;
+    fs.mkdirSync(folder, { recursive: true });
     // Step 4: Write the master playlist to a file
-    fs.writeFileSync(`${folder}/master.m3u8`, masterPlaylist);
-    modifyM3U8Content(folder + '/master.m3u8', name)
+    fs.writeFileSync(folder + `/master.m3u8`, masterPlaylist);
+    modifyM3U8Content(folder + '/master.m3u8', name);
 
     // Step 5: Parse the master playlist
     const parser = new m3u8Parser.Parser();
